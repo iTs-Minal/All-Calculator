@@ -76,11 +76,6 @@ function isLastCharacterOperator() {
 }
 
 add.addEventListener("click", () => {
-  //   if (lastValue !== operators[1]&&!calculate.innerText.trim().endsWith(operators[1])) {
-  //     calculate.innerText += operators[1];
-  //     lastValue = null;
-  //   }
-
   if (!isLastCharacterOperator()) {
     calculate.innerText += operators[1];
     lastValue = operators[1];
@@ -98,64 +93,44 @@ add.addEventListener("click", () => {
 });
 
 sub.addEventListener("click", () => {
-  // if (lastValue !== operators[2]&&!calculate.innerText.trim().endsWith(operators[2])) {
-  //     calculate.innerText += operators[2];
-  //     lastValue = null;
-  //   }
-
   if (!isLastCharacterOperator()) {
     calculate.innerText += operators[2];
     lastValue = operators[2];
   }
 
   if (isLastCharacterOperator()) {
-    // Replace the last operator with the new one
     calculate.innerText =
       calculate.innerText.trim().slice(0, -1) + operators[2];
   } else {
-    // Append the new operator
     calculate.innerText += operators[2];
   }
   lastValue = operators[2];
 });
 
 multiply.addEventListener("click", () => {
-  // if (lastValue !== operators[0]&&!calculate.innerText.trim().endsWith(operators[0])) {
-  //     calculate.innerText += operators[0];
-  //     lastValue = null;
-  //   }
-
   if (!isLastCharacterOperator()) {
     calculate.innerText += operators[0];
     lastValue = operators[0];
   }
 
   if (isLastCharacterOperator()) {
-    // Replace the last operator with the new one
     calculate.innerText =
       calculate.innerText.trim().slice(0, -1) + operators[0];
   } else {
-    // Append the new operator
     calculate.innerText += operators[0];
   }
   lastValue = operators[0];
 });
 divide.addEventListener("click", () => {
-  // if (lastValue !== operators[3]&&!calculate.innerText.trim().endsWith(operators[3])) {
-  //     calculate.innerText += operators[3];
-  //     lastValue = null;
-  //   }
   if (!isLastCharacterOperator()) {
     calculate.innerText += operators[3];
     lastValue = operators[3];
   }
 
   if (isLastCharacterOperator()) {
-    // Replace the last operator with the new one
     calculate.innerText =
       calculate.innerText.trim().slice(0, -1) + operators[3];
   } else {
-    // Append the new operator
     calculate.innerText += operators[3];
   }
   lastValue = operators[3];
@@ -190,11 +165,11 @@ equal.addEventListener("click", equalTo);
 // NOW WORKING WITH THE PART WHERE WE CAN CALCULATE STATISTICS;
 
 let statMode = false;
-let calculationLock=false;
+let calculationLock = false;
 
 //for mean and divide button
 const handleDivide = () => {
-  if(calculationLock)return;
+  if (calculationLock) return;
   if (!calculate.innerText.trim().endsWith("/")) {
     calculate.innerText += "/";
     lastValue = "/";
@@ -202,35 +177,168 @@ const handleDivide = () => {
 };
 
 const handleMean = () => {
-    const input = calculate.textContent.trim(); // Get input from the display div
-    const numbers = input.split(",").map((num) => parseFloat(num)); // Split and parse as numbers
+  // if (calculate.textContent.trim() === ""||calculate.textContent.includes("/")) {
+  // calculate.textContent=calculate.textContent.replace("/","")
+  //   return;
+  // }
 
-    if (numbers.some(isNaN) || numbers.length === 0) {
-      // Validate input: ensure all values are numbers
-      output.textContent = "";
-      return;
-    }
+  let inputM = calculate.textContent.trim(); // Get input from the display div
+  let numbersM = inputM.split(",").map((num) => parseFloat(num)); // Split and parse as numbers
 
-    const mean = numbers.reduce((sum, num) => sum + num, 0) / numbers.length;
-    output.textContent = `Mean: ${mean}`;
-    calculate.textContent=calculate.textContent.replace("/","");
-    calculationLock=true;
+  if (numbersM.some(isNaN) || numbersM.length === 0) {
+    output.textContent = "";
+    return;
+  }
+
+  let mean = numbersM.reduce((sum, num) => sum + num, 0) / numbersM.length;
+  output.textContent = `Mean: ${mean.toFixed(2)}`;
+  calculate.textContent = calculate.textContent.replace("/", "");
+  calculationLock = true;
+  console.log(numbersM)
+  console.log(mean);
 };
 
-// const performDivision = () => {
- 
-// }
+//handeling multiply and median button
+const handleMultiply = () => {
+  if (calculationLock) return;
+  if (!calculate.innerText.trim().endsWith("*")) {
+    calculate.innerText += "*";
+    lastValue = "*";
+  }
+};
 
-//handleing AC
-const handleAc=()=>{
-  calculate.innerText="";
-  output.innerText="";
-  calculationLock=false;
-}
+const handleMedian = () => {
+  let inputMe = calculate.textContent.trim();
+  let numbersMe = inputMe.split(",").map((num) => parseFloat(num));
+
+  if (numbersMe.some(isNaN) || numbersMe.length === 0) {
+    output.textContent = "";
+    return;
+  }
+
+  const sorted = numbersMe.toSorted((a, b) => a - b);
+
+  let median;
+  if (sorted.length % 2 === 0) {
+    const mid1 = sorted[sorted.length / 2];
+    const mid2 = sorted[sorted.length / 2 - 1];
+    median = (mid1 + mid2) / 2;
+  } else {
+    median = sorted[Math.floor(sorted.length / 2)];
+  }
+  output.textContent = `Median: ${median}`;
+  calculate.textContent = calculate.textContent.replace("*", "");
+  calculationLock = true;
+};
+
+//handeling substraction and Mode button
+const handleSub = () => {
+  if (calculationLock) return;
+  if (!calculate.innerText.trim().endsWith("-")) {
+    calculate.innerText += "-";
+    lastValue = "-";
+  }
+};
+const handleMode = () => {
+  let inputMo = calculate.textContent.trim();
+  let numbersMo = inputMo.split(",").map((num) => parseFloat(num));
+
+  if (numbersMo.some(isNaN) || numbersMo.length === 0) {
+    output.textContent = "";
+    return;
+  }
+  const counts = {};
+  numbersMo.forEach((el) => {
+    counts[el] = (counts[el] || 0) + 1;
+  });
+
+  // Check if there is no mode (all frequencies are equal)
+  const frequencies = Object.values(counts);
+  const uniqueFrequencies = new Set(frequencies);
+  if (uniqueFrequencies.size === 1) {
+    output.textContent = "NO MODE";
+  } else {
+    const maxCount = Math.max(...frequencies);
+    const mode = Object.keys(counts)
+      .filter((el) => counts[el] === maxCount)
+      .map(Number);
+
+    output.textContent = `Mode: ${mode.join(", ")}`;
+  }
+
+  if (calculate.textContent.includes("-")) {
+    calculate.textContent = calculate.textContent.replace("-", "");
+  }
+  calculationLock = true;
+};
+
+//handeling addition and variance button
+const handleAdd = () => {
+  if (calculationLock) return;
+  if (!calculate.innerText.trim().endsWith("+")) {
+    calculate.innerText += "+";
+    lastValue = "+";
+  }
+};
+const handleVar = () => {
+  let inputV = calculate.textContent.trim();
+  let numbersV = inputV.split(",").map((num) => parseFloat(num));
+
+  if (numbersV.some(isNaN) || numbersV.length === 0) {
+    output.textContent = "";
+    return;
+  }
+
+  let mean = numbersV.reduce((sum, num) => sum + num, 0) / numbersV.length;
+
+  let variance =
+    numbersV.reduce((acc, el) => {
+      const difference = el - mean;
+      const squared = difference ** 2;
+      return acc + squared;
+    }, 0) / numbersV.length;
+
+  output.textContent = `Variance: ${variance.toFixed(2)}`;
+  calculate.textContent = calculate.textContent.replace("+", "");
+  calculationLock = true;
+};
+
+//handeling equal and standard deviation button
+const handleSd = () => {
+  let inputSd = calculate.textContent.trim();
+  let numbersSd = inputSd.split(",").map((num) => parseFloat(num));
+
+  if (numbersSd.some(isNaN) || numbersSd.length === 0) {
+    output.textContent = "";
+    return;
+  }
+
+  let mean = numbersSd.reduce((sum, num) => sum + num, 0) / numbersSd.length;
+
+  let varSd =
+    numbersSd.reduce((acc, el) => {
+      const difference = el - mean;
+      const squared = difference ** 2;
+      return acc + squared;
+    }, 0) / numbersSd.length;
+
+    const sd = Math.sqrt(varSd);
+
+    output.textContent = `S.D: ${sd.toFixed(3)}`;
+    calculate.textContent = calculate.textContent.replace("=", "");
+    calculationLock = true;
+};
+
+//handleing AC button
+const handleAc = () => {
+  calculate.innerText = "";
+  output.innerText = "";
+  calculationLock = false;
+};
 
 //handeling decimal button
 const handleComma = () => {
-  if(calculationLock)return;
+  if (calculationLock) return;
   if (!calculate.innerText.trim().endsWith(",")) {
     calculate.innerText += ",";
     lastValue = ",";
@@ -243,48 +351,82 @@ const handleDecimal = () => {
   }
 };
 
-//switching the calculator between stat mode and basic mode
+//SWITCHING: the calculator between stat mode and basic mode
 const switchStatMode = () => {
   calculate.innerText = "";
   output.innerText = "";
   stat.textContent = "Basic";
   statMode = true;
-  calculationLock=false;
+  calculationLock = false;
 
+  //working with divide button
   divide.textContent = "Mean";
   divide.addEventListener("click", handleMean);
+
+  //working with multiply button
+  multiply.textContent = "Median";
+  multiply.addEventListener("click", handleMedian);
+
+  //working with substraction button
+  sub.textContent = "Mode";
+  sub.addEventListener("click", handleMode);
+
+  //working with addition button
+  add.textContent = "VAR";
+  add.addEventListener("click", handleVar);
 
   //working with decimal button
   decimal.textContent = ",";
   decimal.removeEventListener("click", handleDecimal);
   decimal.addEventListener("click", handleComma);
 
-  //working with AC button
-reset.addEventListener("click",handleAc)
-
   //working with equal buttton
-  equal.disabled=true;
+  equal.textContent = "S.D";
+  equal.removeEventListener("click", equalTo)
+  equal.addEventListener("click", handleSd);
+
+  //working with AC button
+  reset.addEventListener("click", handleAc);
 };
 const switchBasicMode = () => {
   calculate.innerText = "";
   output.innerText = "";
   stat.textContent = "Stat";
   statMode = false;
-  calculationLock=true;
+  calculationLock = true;
 
+  //working with divide button
   divide.textContent = "/";
-  divide.removeEventListener("click",handleMean)
-  divide.addEventListener("click",handleDivide)
+  divide.removeEventListener("click", handleMean);
+  divide.addEventListener("click", handleDivide);
+
+  //working with multiply button
+  multiply.textContent = "*";
+  multiply.removeEventListener("click", handleMedian);
+  multiply.addEventListener("click", handleMultiply);
+
+  //working with sub button
+  sub.textContent = "-";
+  sub.removeEventListener("click", handleMode);
+  sub.addEventListener("click", handleSub);
+
+  //working with add button
+  add.textContent = "+";
+  add.removeEventListener("click", handleVar);
+  add.addEventListener("click", handleAdd);
+
+  //working with equal buttton
+  equal.textContent = "=";
+  equal.removeEventListener("click", handleSd);
+  equal.addEventListener("click", equalTo);
 
   //working with decimal button
   decimal.textContent = ".";
   decimal.removeEventListener("click", handleComma);
   decimal.addEventListener("click", handleDecimal);
-
-    //working with equal buttton
-    equal.disabled=false;
 };
 
+//working with stat button to switch between modes
 stat.addEventListener("click", () => {
   if (!statMode) {
     switchStatMode();
